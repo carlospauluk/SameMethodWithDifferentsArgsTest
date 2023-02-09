@@ -7,6 +7,25 @@ use PHPUnit\Framework\TestCase;
 class SameMethodWithDifferentsArgsTest extends TestCase
 {
 
+    function testSameMethodWithOnlyOneArgs()
+    {
+        $competition = new Competition('Competition 2023');
+        $athlete1 = new Athlete('John');
+        $competition->athletes[] = $athlete1;
+
+        $mockedCompetitionRepository = $this->createMock(CompetitionRepository::class);
+
+        $mockedCompetitionRepository
+            ->expects($this->once())
+            ->method('findPosition')
+            ->with($this->identicalTo($competition), $this->identicalTo($athlete1))
+            ->willReturn(6);
+
+        $processor = new CompetitionProcessor($mockedCompetitionRepository);
+
+        $this->assertLessThan(11, $processor->checkAthlete($competition, $athlete1));
+    }
+
     function testSameMethodWithDifferentsArgs()
     {
         $competition = new Competition('Competition 2023');
@@ -31,8 +50,8 @@ class SameMethodWithDifferentsArgsTest extends TestCase
 
         $processor = new CompetitionProcessor($mockedCompetitionRepository);
 
-        $this->assertLessThan(10, $processor->checkAthlete($competition, $athlete1));
-        $this->assertLessThan(10, $processor->checkAthlete($competition, $athlete2));
+        $this->assertLessThan(11, $processor->checkAthlete($competition, $athlete1));
+        $this->assertLessThan(11, $processor->checkAthlete($competition, $athlete2));
     }
 
 
@@ -54,10 +73,10 @@ class CompetitionProcessor
         return $this->repository;
     }
 
-    public function checkAthlete(Competition $competition, Athlete $athlete): bool
+    public function checkAthlete(Competition $competition, Athlete $athlete): int
     {
         $position = $this->repository->findPosition($competition, $athlete);
-        return $position < 11;
+        return $position;
     }
 
 }
